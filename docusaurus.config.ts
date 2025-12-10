@@ -10,8 +10,8 @@ const config: Config = {
   // Set the production url of your site here
   url: 'https://JamaliHassan.github.io',
   // Set the /<base> pathname under which your site is served
-  // For GitHub Pages, this is usually /<username>.github.io/<repository-name>/
-  baseUrl: '/hackathon-humanoid-robotics-course-book/',
+  // For Vercel deployment, use root path
+  baseUrl: '/',
 
   // GitHub pages deployment config.
   organizationName: 'JamaliHassan', // Usually your GitHub org/user name.
