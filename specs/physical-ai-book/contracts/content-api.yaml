@@ -1,0 +1,79 @@
+# API Contract: Content Management
+
+## Purpose
+This contract defines the API endpoints for managing book content, primarily for internal tools and potential future content management features.
+
+## Base URL
+`/api/v1`
+
+## Endpoints
+
+### GET /content/modules
+Retrieve a list of all available modules in the book.
+
+#### Response
+```json
+{
+  "modules": [
+    {
+      "id": "introduction-to-ros2",
+      "title": "Introduction to ROS 2",
+      "description": "Learn the basics of ROS 2 framework",
+      "position": 1,
+      "chapters_count": 5
+    }
+  ]
+}
+```
+
+### GET /content/modules/{moduleId}
+Retrieve details about a specific module.
+
+#### Path Parameters
+- `moduleId`: The unique identifier of the module
+
+#### Response
+```json
+{
+  "id": "introduction-to-ros2",
+  "title": "Introduction to ROS 2",
+  "description": "Learn the basics of ROS 2 framework",
+  "chapters": [
+    {
+      "id": "ros2-nodes",
+      "title": "ROS 2 Nodes and Communication",
+      "position": 1
+    }
+  ]
+}
+```
+
+### GET /content/chapters/{chapterId}
+Retrieve content and metadata for a specific chapter.
+
+#### Path Parameters
+- `chapterId`: The unique identifier of the chapter
+
+#### Response
+```json
+{
+  "id": "ros2-nodes",
+  "title": "ROS 2 Nodes and Communication",
+  "module_id": "introduction-to-ros2",
+  "content_type": "hands-on",
+  "prerequisites": ["basic-programming", "linux-fundamentals"],
+  "objectives": [
+    "Understand ROS 2 node architecture",
+    "Create a simple publisher/subscriber system"
+  ],
+  "content": "# Chapter Content\nThis is the markdown content...",
+  "assets": ["/static/images/ros2-architecture.png"],
+  "examples": [
+    {
+      "id": "simple-publisher",
+      "code": "print('Hello ROS 2')",
+      "language": "python"
+    }
+  ]
+}
+```

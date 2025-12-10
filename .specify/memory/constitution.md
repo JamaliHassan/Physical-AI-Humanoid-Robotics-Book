@@ -1,55 +1,87 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+Version change: 1.0.0 --> 1.0.0 (No semantic changes, just initial fill)
+Modified principles: None (initial fill)
+Added sections: None (initial fill)
+Removed sections: None
+Templates requiring updates:
+- .specify/templates/plan-template.md: ✅ updated
+- .specify/templates/spec-template.md: ✅ updated
+- .specify/templates/tasks-template.md: ✅ updated
+- .specify/templates/commands/sp.phr.md: ✅ updated
+- .specify/templates/commands/sp.constitution.md: ✅ updated
+Follow-up TODOs: None
+-->
+# AI/Spec-Driven Technical Book Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Spec-First Workflow
+Every chapter, section, and major feature MUST be defined in `/sp.*` spec files before being implemented. This ensures a clear understanding of requirements and design before coding begins.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Single Source of Truth
+Specs and the existing repository structure ARE authoritative. This means avoiding inventing undocumented features or configuration, and always referring to the defined specs and codebase for truth.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Technical Accuracy
+All technical explanations, commands, and configuration MUST be correct and verifiable from primary sources (official docs, standards). This principle ensures the book's reliability and trustworthiness.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Consistency
+Maintain a coherent structure, tone, terminology, and formatting across all chapters and pages. This is crucial for a professional and easy-to-read technical book.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Reproducibility
+Readers MUST be able to reproduce any setup, example, or workflow described in the book. This principle is vital for a practical technical guide, ensuring readers can follow along and learn effectively.
 
-### [PRINCIPLE_6_NAME]
+### VI. Incremental Evolution
+Prefer iterative refinement of existing content and structure instead of large, uncoordinated rewrites. This approach promotes continuous improvement and manageable changes.
 
+## Key Standards
 
-[PRINCIPLE__DESCRIPTION]
+### Tech Stack
+Docusaurus (v3+), React, MD/MDX, Node.js (LTS). These technologies form the foundation of the book's development and deployment.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### Hosting
+GitHub Pages with GitHub Actions CI/CD. This standard ensures automated and reliable deployment of the book.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### Project Structure
+- Content in `/docs` (and subdirectories) as Markdown/MDX files with proper frontmatter.
+- Static assets (images/media) in `/static` or clearly defined assets directories.
+- Site configuration in `docusaurus.config.*` and sidebar structure in `sidebars.*`.
+This structure provides a clear and organized way to manage the book's content and configuration.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### Writing Style
+- Audience: technical readers (students and developers) with basic web/CLI experience.
+- Clarity: concrete, example-driven explanations; avoid unnecessary jargon.
+- Reading level: approximately Flesch-Kincaid grade 9–12.
+- Voice: direct, instructional, and objective; avoid marketing tone.
+These guidelines ensure the book is accessible, informative, and engaging for its target audience.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### Referencing
+Use official documentation (e.g., Docusaurus, GitHub Pages, Node.js) as primary reference for technical claims. When citing external tools or standards, include URLs or clear pointers so readers can verify and explore further. This maintains the book's authority and allows readers to delve deeper into topics.
+
+### Tooling
+Use Spec-Kit Plus for all spec files (`/sp.constitution`, `/sp.book`, `/sp.chapter.*`, etc.). Use Claude Code for code and content generation/editing, respecting this constitution and all specs. Maintain consistent formatting (Markdown/MDX conventions; Prettier-style code formatting in examples). This ensures a standardized and efficient development workflow.
+
+### Navigation and UX
+Sidebar-driven navigation that mirrors the logical structure of the book. Next/Previous links enabled for linear reading. Dark/Light mode support through Docusaurus theme options. These standards enhance the user experience and readability of the book.
+
+## Constraints
+
+### Book Structure
+Target 8–15 main chapters, each optionally split into multiple sections/pages. Each chapter page should be focused on a single coherent topic. This provides a clear framework for the book's content.
+
+### Content Format
+Use Markdown/MDX only for content pages; avoid custom React components unless clearly justified. All code blocks MUST specify language for syntax highlighting (e.g., ```bash, ```js, ```ts, ```json). This ensures consistent and correctly rendered content.
+
+### Build and Deployment
+The site MUST build locally with `npm install` and `npm run build` with zero errors. Deployment MUST be automated via GitHub Actions to GitHub Pages. No reliance on server-side logic; everything MUST work as a static site. These constraints guarantee a robust and deployable product.
+
+### Assets
+Use only properly licensed or self-created images/media. Optimize images for the web; prefer modern formats (WebP/optimized PNG/JPEG). Reference assets with relative paths that work in the built static site. These guidelines ensure legal compliance and optimal performance.
+
+### Safety and Integrity
+No inclusion of secrets, tokens, or sensitive personal data. No plagiarism; any reused text MUST be paraphrased or quoted with attribution. Avoid hallucinating APIs, configuration options, or tools that do not exist in official docs. These are critical for maintaining security, ethical standards, and accuracy.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+This Constitution supersedes all other project practices. Amendments require documentation, approval, and a migration plan. All PRs/reviews MUST verify compliance. Complexity MUST be justified.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-12-07 | **Last Amended**: 2025-12-07
