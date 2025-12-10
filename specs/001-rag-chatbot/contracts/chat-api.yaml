@@ -1,0 +1,200 @@
+openapi: 3.0.0
+info:
+  title: RAG Chatbot API for Physical AI & Humanoid Robotics Book
+  description: API for the AI Teaching Assistant that allows users to query book content
+  version: 1.0.0
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: https://staging-api.example.com
+    description: Staging server
+
+paths:
+  /chat:
+    post:
+      summary: General Q&A with the AI Teaching Assistant
+      description: Allows users to ask questions about the book content and receive AI-generated responses based on the book's content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: The user's question or message
+                  example: "Explain ROS 2 topics and how they differ from ROS 1"
+                session_id:
+                  type: string
+                  format: uuid
+                  description: Optional session identifier to maintain conversation context
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+                context_url:
+                  type: string
+                  description: Optional URL of the current page for additional context
+                  example: "/docs/module-1-ros2/topics"
+      responses:
+        '200':
+          description: Successful response from the AI
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - response
+                  - session_id
+                properties:
+                  response:
+                    type: string
+                    description: The AI-generated response
+                    example: "ROS 2 topics are a communication mechanism where publishers send messages to subscribers through a topic name..."
+                  session_id:
+                    type: string
+                    format: uuid
+                    description: The session identifier (newly created if not provided)
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+                  sources:
+                    type: array
+                    description: List of source documents used to generate the response
+                    items:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                          description: URL of the source document
+                          example: "/docs/module-1-ros2/topics"
+                        title:
+                          type: string
+                          description: Title of the source section
+                          example: "ROS 2 Topics"
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Message is required"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Failed to process the request"
+
+  /analyze-selection:
+    post:
+      summary: Analyze selected text with the AI Teaching Assistant
+      description: Allows users to submit selected text with context for AI analysis and explanation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+                - context_url
+              properties:
+                text:
+                  type: string
+                  description: The selected text to analyze
+                  example: "ROS 2 topics are a communication mechanism..."
+                context_url:
+                  type: string
+                  description: URL of the page where text was selected
+                  example: "/docs/module-1-ros2/topics"
+                session_id:
+                  type: string
+                  format: uuid
+                  description: Optional session identifier to maintain conversation context
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Successful analysis response from the AI
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - explanation
+                  - session_id
+                properties:
+                  explanation:
+                    type: string
+                    description: The AI-generated explanation of the selected text
+                    example: "This text explains the concept of ROS 2 topics, which are a publish-subscribe communication pattern..."
+                  session_id:
+                    type: string
+                    format: uuid
+                    description: The session identifier (newly created if not provided)
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+                  related_topics:
+                    type: array
+                    description: Related topics from the book that may be helpful
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                          description: Title of the related topic
+                          example: "ROS 2 Services"
+                        url:
+                          type: string
+                          description: URL to the related topic
+                          example: "/docs/module-1-ros2/services"
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Text and context_url are required"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Failed to process the selection analysis"
+
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Check if the API is running and healthy
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Health status
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: When the health check was performed
+                    example: "2025-12-10T10:00:00Z"

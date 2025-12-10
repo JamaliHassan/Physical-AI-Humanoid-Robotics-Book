@@ -84,4 +84,3 @@ package.json
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |---|---|---|
 | | | |
-n

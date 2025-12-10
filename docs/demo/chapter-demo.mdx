@@ -1,0 +1,90 @@
+---
+title: "Chapter Demo - Physical AI & Humanoid Robotics"
+description: "Demo page showing auth, personalization, and translation features"
+---
+
+import SignupForm from '@site/src/components/Auth/SignupForm';
+import SigninForm from '@site/src/components/Auth/SigninForm';
+import PersonalizeButton from '@site/src/components/Personalization/PersonalizeButton';
+import TranslateButton from '@site/src/components/Translation/TranslateButton';
+import ContentAdapter from '@site/src/components/Personalization/ContentAdapter';
+import UrduContent from '@site/src/components/Translation/UrduContent';
+
+# Physical AI & Humanoid Robotics - Chapter Demo
+
+This page demonstrates the auth, personalization, and translation features.
+
+## Authentication
+
+### Sign Up
+<SignupForm />
+
+### Sign In
+<SigninForm />
+
+## Personalization Demo
+
+<PersonalizeButton chapterId="demo-chapter-1" />
+
+<ContentAdapter
+  chapterId="demo-chapter-1"
+  content={{
+    beginner: (
+      <div>
+        <h3>Beginner Content</h3>
+        <p>This is simplified content for beginners learning about humanoid robotics.</p>
+        <p>We'll explain concepts in simple terms with basic examples.</p>
+      </div>
+    ),
+    intermediate: (
+      <div>
+        <h3>Intermediate Content</h3>
+        <p>This content assumes some knowledge of robotics concepts.</p>
+        <p>We'll dive deeper into the mathematics behind humanoid locomotion.</p>
+      </div>
+    ),
+    advanced: (
+      <div>
+        <h3>Advanced Content</h3>
+        <p>This content is for experts familiar with advanced robotics concepts.</p>
+        <p>We'll explore cutting-edge research in Physical AI and embodied intelligence.</p>
+        <pre>
+          {`// Advanced control algorithm
+function computeControlAction(state, policy) {
+  return policy(state);
+}`}
+        </pre>
+      </div>
+    )
+  }}
+  hardwareSpecific={{
+    realRobot: (
+      <div className="hardware-specific">
+        <h4>Real Robot Specific</h4>
+        <p>Since you have access to a real robot, here are specific instructions for testing on hardware.</p>
+      </div>
+    )
+  }}
+/>
+
+## Translation Demo
+
+<TranslateButton chapterId="demo-chapter-1" />
+
+<UrduContent
+  chapterId="demo-chapter-1"
+  englishContent={
+    <div>
+      <h3>English Content</h3>
+      <p>This is the English version of the content about humanoid robotics.</p>
+      <p>We explore the fundamentals of building intelligent physical systems.</p>
+    </div>
+  }
+  urduContent={
+    <div dir="rtl">
+      <h3>اردو مواد</h3>
+      <p> humanoid robotics کے بارے میں مواد کا انگریزی ورژن یہ ہے۔</p>
+      <p>ہم انٹیلیجینٹ فزکل سسٹمز کی تعمیر کے بنیادی طریقے سمجھتے ہیں۔</p>
+    </div>
+  }
+/>

@@ -67,6 +67,13 @@ const sidebars = {
         'lab-architectures/cloud-solutions'
       ],
     },
+    {
+      type: 'category',
+      label: 'Demo',
+      items: [
+        'demo/chapter-demo'
+      ],
+    },
   ],
 
   // But you can create a sidebar manually
