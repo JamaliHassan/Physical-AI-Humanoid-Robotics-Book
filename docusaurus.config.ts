@@ -15,7 +15,7 @@ const config: Config = {
 
   // GitHub pages deployment config.
   organizationName: 'JamaliHassan', // Usually your GitHub org/user name.
-  projectName: 'hackathon-humanoid-robotics-course-book', // Usually your repo name.
+  projectName: 'Physical-AI-Humanoid-Robotics-Book', // Usually your repo name.
   deploymentBranch: 'gh-pages', // Branch that GitHub Pages will deploy from.
 
   onBrokenLinks: 'warn',
