@@ -11,7 +11,7 @@ const config: Config = {
   url: 'https://JamaliHassan.github.io',
   // Set the /<base> pathname under which your site is served
   // For Vercel deployment, use root path
-  baseUrl: '/',
+  baseUrl: '/Physical-AI-Humanoid-Robotics-Book',
 
   // GitHub pages deployment config.
   organizationName: 'JamaliHassan', // Usually your GitHub org/user name.
