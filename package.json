@@ -5,8 +5,8 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "npm run build:tailwind && docusaurus build",
     "build:tailwind": "npx tailwindcss -i ./src/css/tailwind.css -o ./static/css/tailwind-output.css --minify",
+    "build": "npm run build:tailwind && docusaurus build",
     "dev:tailwind": "npx tailwindcss -i ./src/css/tailwind.css -o ./static/css/tailwind-output.css --watch",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
