@@ -5,9 +5,9 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build:tailwind": "node_modules/.bin/tailwindcss -i ./src/css/tailwind.css -o ./static/css/tailwind-output.css --minify",
+    "build:tailwind": "npx tailwindcss -i ./src/css/tailwind.css -o ./static/css/tailwind-output.css --minify",
     "build": "npm run build:tailwind && docusaurus build",
-    "dev:tailwind": "node_modules/.bin/tailwindcss -i ./src/css/tailwind.css -o ./static/css/tailwind-output.css --watch",
+    "dev:tailwind": "npx tailwindcss -i ./src/css/tailwind.css -o ./static/css/tailwind-output.css --watch",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
