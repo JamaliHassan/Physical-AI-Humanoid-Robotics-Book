@@ -18,44 +18,40 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'Module 1: ROS 2 Fundamentals',
+      label: 'Module 1: Robotic Nervous System (ROS 2)',
       items: [
         'module-1-ros2/intro',
-        'module-1-ros2/nodes-topics',
-        'module-1-ros2/services-actions',
-        'module-1-ros2/urdf-basics',
+        'module-1-ros2/m1c1-nodes-communication',
+        'module-1-ros2/m1c2-urdf-sdf',
         'module-1-ros2/homework'
       ],
     },
     {
       type: 'category',
-      label: 'Module 2: Digital Twin - Gazebo and Unity',
+      label: 'Module 2: Digital Twin (Gazebo & Unity)',
       items: [
-        'module-2-gazebo-unity/intro',
-        'module-2-gazebo-unity/gazebo-fundamentals',
-        'module-2-gazebo-unity/unity-robotics',
-        'module-2-gazebo-unity/digital-twin-implementation'
+        'module-2-digital-twin/intro',
+        'module-2-digital-twin/m2c1-gazebo-fortress',
+        'module-2-digital-twin/m2c2-unity-bridge',
       ],
     },
     {
       type: 'category',
-      label: 'Module 3: NVIDIA Isaac and Sim to Real',
+      label: 'Module 3: AI-Robot Brain (NVIDIA Isaac)',
       items: [
-        'module-3-isaac-sim/intro',
-        'module-3-isaac-sim/isaac-sim-basics',
-        'module-3-isaac-sim/isaac-ros-packages',
-        'module-3-isaac-sim/navigation-with-nav2'
+        'module-3-ai-brain/intro',
+        'module-3-ai-brain/m3c1-isaac-sim-setup',
+        'module-3-ai-brain/m3c2-isaac-ros-vslam',
+        'module-3-ai-brain/m3c3-nav2-humanoids',
       ],
     },
     {
       type: 'category',
-      label: 'Module 4: VLA and Autonomous Humanoid Capstone',
+      label: 'Module 4: Vision-Language-Action (VLA)',
       items: [
-        'module-4-vla-capstone/intro',
-        'module-4-vla-capstone/voice-processing',
-        'module-4-vla-capstone/language-understanding',
-        'module-4-vla-capstone/action-execution',
-        'module-4-vla-capstone/capstone-project'
+        'module-4-vla/intro',
+        'module-4-vla/m4c1-voice-to-action',
+        'module-4-vla/m4c2-vla-pipeline',
       ],
     },
     {
@@ -65,13 +61,6 @@ const sidebars = {
         'lab-architectures/intro',
         'lab-architectures/on-premises-setup',
         'lab-architectures/cloud-solutions'
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Demo',
-      items: [
-        'demo/chapter-demo'
       ],
     },
   ],

@@ -5,7 +5,9 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "docusaurus build",
+    "build": "npm run build:tailwind && docusaurus build",
+    "build:tailwind": "npx tailwindcss -i ./src/css/tailwind.css -o ./static/css/tailwind-output.css --minify",
+    "dev:tailwind": "npx tailwindcss -i ./src/css/tailwind.css -o ./static/css/tailwind-output.css --watch",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
@@ -15,6 +17,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@better-auth/client": "^0.0.2-alpha.3",
     "@docusaurus/core": "^3.0.0",
     "@docusaurus/preset-classic": "^3.0.0",
     "@mdx-js/react": "^3.0.0",
@@ -22,11 +25,19 @@
     "clsx": "^2.0.0",
     "prism-react-renderer": "^2.3.0",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "react-query": "^3.39.3"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.9.2",
+    "@docusaurus/plugin-client-redirects": "^3.9.2",
     "@docusaurus/types": "^3.9.2",
+    "autoprefixer": "^10.4.23",
+    "css-loader": "^7.1.2",
+    "postcss": "^8.5.6",
+    "postcss-loader": "^8.2.0",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"
   },
   "browserslist": {

@@ -76,6 +76,16 @@ const config: Config = {
             position: 'left',
           },
           {
+            to: '/auth/signup',
+            label: 'Sign Up',
+            position: 'right',
+          },
+          {
+            to: '/auth/signin',
+            label: 'Sign In',
+            position: 'right',
+          },
+          {
             href: 'https://github.com/JamaliHassan/Physical-AI-Humanoid-Robotics-Book',
             label: 'GitHub',
             position: 'right',
@@ -136,6 +146,38 @@ const config: Config = {
         darkTheme: prismThemes.dracula,
       },
     } satisfies Preset.ThemeConfig,
+
+  plugins: [
+    async function myPlugin(context, options) {
+      return {
+        name: 'webpack-config-plugin',
+        configureWebpack(config, isServer, utils) {
+          // Add PostCSS loader for CSS files to support Tailwind
+          config.module ||= { rules: [] };
+          config.module.rules.push({
+            test: /\.css$/i,
+            use: [
+              require.resolve('style-loader'),
+              require.resolve('css-loader'),
+              {
+                loader: require.resolve('postcss-loader'),
+                options: {
+                  postcssOptions: {
+                    plugins: [
+                      ['tailwindcss', { config: './tailwind.config.js' }],
+                      ['autoprefixer'],
+                    ],
+                  },
+                },
+              },
+            ],
+          });
+
+          return config;
+        },
+      };
+    },
+  ],
 };
 
 export default config;

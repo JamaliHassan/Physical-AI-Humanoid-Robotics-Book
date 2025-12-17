@@ -1,0 +1,222 @@
+---
+id: m1c2-urdf-sdf
+title: "Chapter 2: URDF/SDF for Robot Description"
+sidebar_label: URDF/SDF
+description: "Create robot descriptions using URDF and SDF formats"
+keywords:
+  - urdf
+  - sdf
+  - robot-description
+  - humanoid
+module: 1
+week: 2
+complexity: deep-technical
+target_hardware: ["simulation", "edge"]
+learning_objectives:
+  - "Create a URDF file for a 2-DOF leg structure"
+  - "Understand the difference between visual and collision meshes"
+  - "Visualize the robot model in rviz2"
+  - "Convert URDF to SDF for Gazebo simulation"
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Chapter 2: URDF/SDF for Robot Description
+
+## Learning Objectives
+- Create a URDF file for a 2-DOF leg structure
+- Understand the difference between visual and collision meshes
+- Visualize the robot model in rviz2
+- Convert URDF to SDF for Gazebo simulation
+- Implement joint limits and dynamics parameters
+
+## Prerequisites
+- Basic understanding of robotics kinematics
+- XML familiarity
+- ROS 2 basics from M1C1
+
+## 1. Concept (Theory)
+URDF (Unified Robot Description Format) is an XML format used to describe robot models in ROS. It defines:
+- Kinematic structure (links and joints)
+- Visual appearance (meshes, colors)
+- Collision properties (collision meshes)
+- Inertial properties (mass, center of mass, inertia)
+
+SDF (Simulation Description Format) is used by Gazebo for physics simulation and includes additional simulation-specific parameters.
+
+## 2. Simulator Implementation
+
+<Tabs>
+<TabItem value="simulation" label="Simulation Setup">
+
+```xml
+<?xml version="1.0"?>
+<robot name="simple_leg">
+  <!-- Base link -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 0.8"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
+    </inertial>
+  </link>
+
+  <!-- Hip joint -->
+  <joint name="hip_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="thigh_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="100" velocity="3.0"/>
+  </joint>
+
+  <!-- Thigh link -->
+  <link name="thigh_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.5" radius="0.05"/>
+      </geometry>
+      <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+      <material name="red">
+        <color rgba="1 0 0 0.8"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.5" radius="0.05"/>
+      </geometry>
+      <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- Knee joint -->
+  <joint name="knee_joint" type="revolute">
+    <parent link="thigh_link"/>
+    <child link="shank_link"/>
+    <origin xyz="0 0 -0.5" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="100" velocity="3.0"/>
+  </joint>
+
+  <!-- Shank link -->
+  <link name="shank_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.4" radius="0.04"/>
+      </geometry>
+      <origin xyz="0 0 -0.2" rpy="1.57 0 0"/>
+      <material name="green">
+        <color rgba="0 1 0 0.8"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.4" radius="0.04"/>
+      </geometry>
+      <origin xyz="0 0 -0.2" rpy="1.57 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.005" ixy="0.0" ixz="0.0" iyy="0.005" iyz="0.0" izz="0.0005"/>
+    </inertial>
+  </link>
+</robot>
+```
+
+Visualize the robot in rviz2:
+```bash
+# Launch rviz2 with robot state publisher
+ros2 run rviz2 rviz2
+
+# In another terminal, publish the robot description
+ros2 run robot_state_publisher robot_state_publisher --ros-args -p robot_description:=$(cat simple_leg.urdf)
+```
+
+**Hardware Reality Check**: Runs on Simulation (RTX PC)
+
+**Dependencies**:
+```xml
+<!-- package.xml -->
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>simple_leg_description</name>
+  <version>0.1.0</version>
+  <description>Simple 2-DOF leg URDF description</description>
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>Apache-2.0</license>
+
+  <exec_depend>urdf</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+```
+
+</TabItem>
+</Tabs>
+
+## 3. Edge Deployment Strategy
+
+<Tabs>
+<TabItem value="edge" label="Edge Deployment">
+
+For edge deployment on NVIDIA Jetson platforms:
+
+- Use simplified collision meshes for better performance
+- Optimize inertial parameters for real-world dynamics
+- Consider manufacturing tolerances in joint limits
+- Validate URDF against physical robot CAD model
+
+**Hardware Reality Check**: Runs on Edge (Jetson)
+
+</TabItem>
+</Tabs>
+
+## Visual Verification
+```mermaid
+graph TD
+    A[Base Link] --> B[Hip Joint]
+    B --> C[Thigh Link]
+    C --> D[Knee Joint]
+    D --> E[Shank Link]
+    F[URDF File] --> A
+    G[rviz2] --> F
+    G --> H[Visualization]
+    H --> I[Robot Model]
+```
+
+## Exercises and Labs
+1. Create a URDF for a simple 2-DOF leg with proper inertial properties
+2. Visualize the robot in rviz2 and verify joint limits
+3. Convert the URDF to SDF format for Gazebo simulation
+4. Add a simple controller to move the joints
+
+## Troubleshooting
+- If the robot doesn't appear in rviz2, check the robot_description parameter
+- If joints move unexpectedly, verify joint limits and types
+- For simulation issues, ensure all mesh files are properly referenced
+
+## Further Reading
+- ROS 2 URDF tutorials
+- Gazebo SDF documentation
+- Isaac Sim USD conversion from URDF

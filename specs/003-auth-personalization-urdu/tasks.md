@@ -1,125 +1,207 @@
-# Implementation Tasks: Auth, Personalization, and Urdu Translation Bonus Features
+---
+description: "Task list for Auth, Personalization & Urdu Translation feature implementation"
+---
 
-## Feature Overview
+# Tasks: Auth, Personalization & Urdu Translation
 
-Implementation of authentication, personalization, and Urdu translation features for the Physical AI & Humanoid Robotics book. The plan includes Better Auth integration for user signup/signin with background capture, chapter-level content personalization based on user profile, and Urdu translation capabilities with toggle functionality.
+**Input**: Design documents from `/specs/003-auth-personalization-urdu/`
+**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
+
+**Tests**: No explicit test requirements in the specification - tests are NOT included.
+
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+
+## Format: `[ID] [P?] [Story] Description`
+
+- **[P]**: Can run in parallel (different files, no dependencies)
+- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- Include exact file paths in descriptions
+
+## Path Conventions
+
+- **Web app**: `backend/src/`, `src/` (for frontend components)
+
+## Phase 1: Setup (Shared Infrastructure)
+
+**Purpose**: Project initialization and basic structure
+
+- [X] T001 Create backend directory structure per implementation plan
+- [X] T002 Initialize backend Node.js project with package.json
+- [X] T003 [P] Install better-auth and Hono dependencies for backend
+- [X] T004 [P] Install frontend dependencies: better-auth/client, react-query
+- [X] T005 Create backend/src directory and basic server file structure
+
+---
+
+## Phase 2: Foundational (Blocking Prerequisites)
+
+**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
+
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+
+- [X] T006 Setup backend authentication server with Hono framework in backend/src/server.ts
+- [X] T007 Configure better-auth with extended user schema (software_exp, hardware_rtx, hardware_robot, preferred_lang) in backend/src/auth/config.ts
+- [X] T008 [P] Setup CORS configuration to allow requests from Docusaurus frontend (localhost:3000)
+- [X] T009 [P] Create UserContext provider in src/context/UserContext.tsx for global state management
+- [X] T010 Create backend database schema with SQLite for user authentication
+- [X] T011 Configure environment variables for backend authentication
+
+**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
+
+---
+
+## Phase 3: User Story 1 - User Authentication and Profile Setup (Priority: P1) 🎯 MVP
+
+**Goal**: Implement user signup/signin with modal-based UI and extended profile collection (software experience, hardware access, language preference)
+
+**Independent Test**: User can open auth modal, complete signup with email/password and background questionnaire, account is created with profile data persisted and user context is updated
+
+### Implementation for User Story 1
+
+- [X] T012 [P] [US1] Create AuthModal component with backdrop blur effect in src/components/Auth/AuthModal.tsx
+- [X] T013 [P] [US1] Create SigninForm component in src/components/Auth/SigninForm.tsx
+- [X] T014 [P] [US1] Create SignupForm component with background questionnaire in src/components/Auth/SignupForm.tsx
+- [X] T015 [US1] Implement two-step signup flow (Step 1: email/password, Step 2: profile wizard) in src/components/Auth/AuthModal.tsx
+- [X] T016 [US1] Create profile wizard with radio buttons and toggles for background questions in src/components/Auth/SignupForm.tsx
+- [X] T017 [US1] Integrate AuthModal with UserContext to update user state in src/theme/Root.tsx
+- [X] T018 [US1] Test auth flow with extended profile data collection
+
+**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
+
+---
+
+## Phase 4: User Story 2 - Chapter Content Personalization (Priority: P2)
+
+**Goal**: Enable logged-in users to see content tailored to their experience level and hardware access via a "Personalize Content" button that adapts content based on user profile
+
+**Independent Test**: User can log in with different profiles and verify chapter content adapts appropriately (beginners see extra explanations, users without RTX see simulation-focused content)
+
+### Implementation for User Story 2
+
+- [X] T019 [US2] Create PersonalizedBlock component with requirements prop in src/components/Personalization/PersonalizedBlock.tsx
+- [X] T020 [US2] Implement logic to check user profile against requirements in src/components/Personalization/PersonalizedBlock.tsx
+- [X] T021 [US2] Create PersonalizeButton component in src/components/Personalization/PersonalizeButton.tsx
+- [X] T022 [US2] Create ChapterControlsBar component with pill-shaped buttons in src/components/ChapterControls/ChapterControlsBar.tsx
+- [X] T023 [US2] Integrate personalization state into UserContext with isPersonalizedView toggle
+- [X] T024 [US2] Add personalization logic to consume user profile and requirements in src/components/Personalization/PersonalizedBlock.tsx
+- [ ] T025 [US2] Test personalization with different user profiles
+
+**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
+
+---
+
+## Phase 5: User Story 3 - Urdu Translation (Priority: P3)
+
+**Goal**: Enable logged-in users to see chapter content in Urdu via a "Translate to Urdu" button while preserving code blocks and structure
+
+**Independent Test**: User can log in and verify chapter content translates to Urdu while preserving technical elements and structure
+
+### Implementation for User Story 3
+
+- [X] T026 [US3] Create TranslateButton component in src/components/Translation/TranslateButton.tsx
+- [X] T027 [US3] Create UrduContent component to handle translation display in src/components/Translation/UrduContent.tsx
+- [X] T028 [US3] Implement translation API endpoints in backend/src/translation/ (GET /api/translations/{contentId})
+- [X] T029 [US3] Add translation toggle state to UserContext with isUrduView toggle
+- [X] T030 [US3] Integrate translation functionality into ChapterControlsBar component
+- [X] T031 [US3] Ensure code blocks and commands remain in English during translation
+- [X] T032 [US3] Test Urdu translation functionality with content preservation
+
+**Checkpoint**: All user stories should now be independently functional
+
+---
+
+## Phase 6: Polish & Cross-Cutting Concerns
+
+**Purpose**: Improvements that affect multiple user stories
+
+- [X] T033 [P] Update theme/Root.tsx to wrap application with UserContext provider
+- [X] T034 [P] Add styling with iwind CSS to all new components
+- [X] T035 Documentation updates based on quickstart.md
+- [X] T036 Run quickstart.md validation to ensure all components work together
+- [X] T037 Add error handling for auth modal and personalization components
+- [X] T038 Final integration testing of all user stories
+
+---
+
+## Dependencies & Execution Order
+
+### Phase Dependencies
+
+- **Setup (Phase 1)**: No dependencies - can start immediately
+- **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
+- **User Stories (Phase 3+)**: All depend on Foundational phase completion
+  - User stories can then proceed in parallel (if staffed)
+  - Or sequentially in priority order (P1 → P2 → P3)
+- **Polish (Final Phase)**: Depends on all desired user stories being complete
+
+### User Story Dependencies
+
+- **User Story 1 (P1)**: Can start after Foundational (Phase 2) - No dependencies on other stories
+- **User Story 2 (P2)**: Can start after Foundational (Phase 2) - Depends on US1 for user authentication but should be independently testable
+- **User Story 3 (P3)**: Can start after Foundational (Phase 2) - Depends on US1 for user authentication but should be independently testable
+
+### Within Each User Story
+
+- Core implementation before integration
+- Story complete before moving to next priority
+
+### Parallel Opportunities
+
+- All Setup tasks marked [P] can run in parallel
+- All Foundational tasks marked [P] can run in parallel (within Phase 2)
+- Once Foundational phase completes, all user stories can start in parallel (if team capacity allows)
+- Different user stories can be worked on in parallel by different team members
+
+---
+
+## Parallel Example: User Story 1
+
+```bash
+# Launch all components for User Story 1 together:
+Task: "Create AuthModal component with backdrop blur effect in src/components/Auth/AuthModal.tsx"
+Task: "Create SigninForm component in src/components/Auth/SigninForm.tsx"
+Task: "Create SignupForm component with background questionnaire in src/components/Auth/SignupForm.tsx"
+```
+
+---
 
 ## Implementation Strategy
 
-**MVP Approach**: Focus on core functionality first - basic auth with profile collection, simple personalization toggle for one chapter, and basic Urdu translation toggle for one chapter. Then expand to all chapters.
+### MVP First (User Story 1 Only)
 
-**Phases**:
-- Phase 1: Research and architecture decisions
-- Phase 2: Auth and profile foundation
-- Phase 3: Personalization model and UI
-- Phase 4: Urdu translation strategy and UI
-- Phase 5: Validation and documentation
+1. Complete Phase 1: Setup
+2. Complete Phase 2: Foundational (CRITICAL - blocks all stories)
+3. Complete Phase 3: User Story 1
+4. **STOP and VALIDATE**: Test User Story 1 independently
+5. Deploy/demo if ready
 
-## Dependencies
+### Incremental Delivery
 
-- Phase 2 depends on Phase 1 (architecture decisions needed before implementation)
-- Phase 3 depends on Phase 2 (auth foundation needed before personalization)
-- Phase 4 depends on Phase 2 (auth foundation needed before translation)
-- Phase 5 depends on Phases 2, 3, and 4 (validation requires all features implemented)
+1. Complete Setup + Foundational → Foundation ready
+2. Add User Story 1 → Test independently → Deploy/Demo (MVP!)
+3. Add User Story 2 → Test independently → Deploy/Demo
+4. Add User Story 3 → Test independently → Deploy/Demo
+5. Each story adds value without breaking previous stories
 
-## Parallel Execution Opportunities
+### Parallel Team Strategy
 
-- Personalization and translation implementation can run in parallel after Phase 2
-- Multiple chapters can have features implemented in parallel after initial prototype
+With multiple developers:
 
----
-
-## Phase 1: Research & Architecture
-
-### Goal
-Research Better Auth integration patterns with static Docusaurus site, decide on architecture approach, and document technical decisions for implementation.
-
-### Independent Test Criteria
-- Integration approach documented with pros/cons
-- Architecture decisions justified and recorded
-- Translation strategy selected and validated
-
-- [X] B-T001 Research Better Auth integration with static Docusaurus site
-- [X] B-T002 Decide auth architecture: separate service vs integrated approach
-- [X] B-T003 [P] Decide user profile storage and frontend access pattern
-- [X] B-T004 [P] Decide Urdu translation strategy: pre-generated vs on-demand
+1. Team completes Setup + Foundational together
+2. Once Foundational is done:
+   - Developer A: User Story 1
+   - Developer B: User Story 2
+   - Developer C: User Story 3
+3. Stories complete and integrate independently
 
 ---
 
-## Phase 2: Auth & Profile
+## Notes
 
-### Goal
-Implement Better Auth foundation with signup form that captures user background information and provides profile access to the frontend.
-
-### Independent Test Criteria
-- Users can sign up with background questions
-- Profile data is stored and retrievable
-- Auth state is detectable in Docusaurus frontend
-
-- [X] B-T005 Set up Better Auth configuration with extended user profile fields
-- [X] B-T006 Create signup form component with background questions
-- [X] B-T007 [P] Implement signin and session handling
-- [X] B-T008 [P] Create frontend auth state detection utilities
-- [X] B-T009 [P] Implement user profile access for personalization/translation
-- [X] B-T010 [P] Add environment variables and security configuration
-
----
-
-## Phase 3: Personalization Model & UI
-
-### Goal
-Implement personalization logic and UI components that adapt chapter content based on user profile when the personalization button is pressed.
-
-### Independent Test Criteria
-- Personalize button appears on chapter pages for logged-in users
-- Content adapts based on user profile (experience level, hardware access)
-- Base content remains accessible when personalization is disabled
-
-- [X] B-T011 Define personalization rules mapping profile to content behavior
-- [X] B-T012 Create reusable personalization helper logic
-- [X] B-T013 Add "Personalize this chapter" button to chapter layout
-- [X] B-T014 [P] Implement personalization logic for beginner/advanced experience
-- [X] B-T015 [P] Implement personalization logic for hardware availability
-- [X] B-T016 [P] Test personalization with prototype chapter (M1C1)
-- [X] B-T017 [P] [US1] Generalize personalization to additional chapters
-
----
-
-## Phase 4: Urdu Translation Strategy & UI
-
-### Goal
-Implement Urdu translation functionality with a toggle button that switches chapter content to Urdu while preserving code and technical content.
-
-### Independent Test Criteria
-- Translate to Urdu button appears on chapter pages for logged-in users
-- Content switches to Urdu when button is pressed
-- Code blocks and technical elements remain in English
-- Easy toggle back to English
-
-- [X] B-T018 [P] Set up Urdu translation content storage structure
-- [X] B-T019 [P] Create initial Urdu translation for prototype chapter (M1C1)
-- [X] B-T020 [P] Add "Translate to Urdu" button to chapter layout
-- [X] B-T021 [P] [US2] Implement translation toggle functionality
-- [X] B-T022 [P] [US2] Ensure code blocks remain in English during translation
-- [X] B-T023 [P] [US2] Create additional Urdu translations for key chapters
-- [X] B-T024 [P] [US2] Implement translation caching for performance
-
----
-
-## Phase 5: Validation & Documentation
-
-### Goal
-Test all features end-to-end, validate against success criteria, and create documentation for future maintainers.
-
-### Independent Test Criteria
-- Auth flows work correctly with background questions
-- Personalization adapts content meaningfully based on different profiles
-- Urdu translation works across multiple chapters
-- Documentation explains architecture and usage
-
-- [X] B-T025 Test auth flows end-to-end with different user profiles
-- [X] B-T026 [P] Test personalization with beginner vs advanced user profiles
-- [X] B-T027 [P] Test personalization with different hardware access profiles
-- [X] B-T028 [P] Test Urdu translation toggle across multiple chapters
-- [X] B-T029 [P] Validate integration with existing book functionality
-- [X] B-T030 [P] Create architecture and usage documentation
+- [P] tasks = different files, no dependencies
+- [Story] label maps task to specific user story for traceability
+- Each user story should be independently completable and testable
+- Verify tests fail before implementing
+- Commit after each task or logical group
+- Stop at any checkpoint to validate story independently
+- Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence

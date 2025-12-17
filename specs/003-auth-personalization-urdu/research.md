@@ -1,174 +1,175 @@
-# Research: Auth, Personalization, and Urdu Translation Bonus Features
+# Research: Auth, Personalization & Urdu Translation
 
 ## Executive Summary
 
-This research document provides the technical foundation for implementing authentication, personalization, and Urdu translation features for the Physical AI & Humanoid Robotics book. The research covers Better Auth integration patterns, Docusaurus extension capabilities, personalization strategies, and Urdu translation approaches.
+This research addresses the architectural ambiguity mentioned in the specification by establishing a dual-architecture system with a separate backend authentication server and Docusaurus frontend. The research covers Node.js server implementation with better-auth, Docusaurus integration patterns, personalization strategies, and Urdu translation approaches to handle Docusaurus SSG limitations.
 
-## Better Auth Integration Research
+## Backend Authentication Server Research
 
-### Integration Patterns with Static Sites
+### Server Framework Options
 
-Better Auth can be integrated with static sites like Docusaurus in several ways:
+For the backend authentication server (port 4000), we have two primary options:
 
-1. **Server-side Integration**: Run Better Auth as a separate backend service with API endpoints
-   - Pros: Secure token handling, server-side validation, full feature access
-   - Cons: Requires backend infrastructure, additional deployment complexity
+1. **Express.js**: Mature, well-documented, extensive middleware ecosystem
+   - Pros: Large community, extensive documentation, many plugins
+   - Cons: Larger bundle size, more complex setup
 
-2. **Client-side Integration**: Use Better Auth's client SDK directly in Docusaurus
-   - Pros: Seamless user experience, no separate auth flow, direct profile access
-   - Cons: Requires careful token management, potential security considerations
+2. **Hono**: Modern, lightweight, fast, designed for edge environments
+   - Pros: Minimal bundle size, fast performance, TypeScript support
+   - Cons: Smaller ecosystem, less documentation
 
-**Decision**: Client-side integration with server-side endpoints for sensitive operations provides the best balance of user experience and security.
+**Decision**: Hono is preferred for its lightweight nature and performance, which aligns with the requirement for a lightweight server.
 
-### Authentication Flow in Docusaurus Context
+### Better-Auth Integration Patterns
 
-Better Auth provides React hooks and components that can be integrated into Docusaurus MDX files:
-- `useAuth()` hook to detect login state
-- `SignIn` and `SignUp` components for authentication UI
-- Custom forms can extend the default authentication flows
+Better-auth can be integrated with the backend server to provide authentication services:
 
-## Docusaurus Extension Research
+- Provides built-in user management and session handling
+- Supports custom schema extensions for `software_exp`, `hardware_rtx`, `hardware_robot`, `preferred_lang`
+- Handles secure token management and session validation
+- Provides both API endpoints and client-side libraries
 
-### Adding Auth-Aware Components
+## Docusaurus Integration Research
 
-Docusaurus v3 supports custom React components in MDX files:
-- Components can access browser APIs and make API calls
-- Auth state can be managed at the component level
-- Context providers can be used for global auth state
+### Handling SSG Limitations
 
-### Per-Chapter Component Integration
+Docusaurus being a static site generator creates challenges for authentication:
 
-Each chapter MDX file can include:
-- Conditional rendering based on auth state
-- Personalization controls that adapt content
-- Translation toggles that switch language
+- Static sites cannot maintain server-side session state
+- Solution: Separate backend server for auth with frontend integration
+- Frontend uses better-auth client to communicate with backend server
+- User context maintained in React Context for component access
+
+### Frontend Integration Patterns
+
+Docusaurus v3 supports custom React components that can integrate with external auth services:
+
+- Components can make API calls to the backend auth server
+- React Context API can provide global user state
+- Custom components can be injected into chapter pages
+- Chapter Controls bar can be implemented as a reusable component
 
 ## Personalization Model Research
 
+### Personalization Component Design
+
+The `<PersonalizedBlock requirements={{ rtx: true, level: 'advanced' }}>` component requires:
+
+- Context consumption to access user profile data
+- Conditional rendering based on user profile vs. requirements
+- Proper handling when personalization is disabled
+- Fallback to default content when conditions aren't met
+
 ### Content Adaptation Strategies
 
-1. **Conditional Rendering**: Show/hide content blocks based on user profile
-   - Implementation: React conditional rendering with profile data
-   - Pros: Fast, no additional API calls
-   - Cons: Larger bundle size with all content variants
+1. **Client-side Conditional Rendering**:
+   - Implementation: Component checks user profile against requirements
+   - Pros: Fast, no additional API calls, immediate response to toggles
+   - Cons: All content variants in bundle
 
-2. **Dynamic Content Loading**: Load personalized content from API
-   - Implementation: API endpoint returns content based on profile
-   - Pros: Smaller bundle size
-   - Cons: Additional API calls, potential latency
-
-**Decision**: Conditional rendering approach as it provides better performance and user experience for the book content.
-
-### Personalization Rules Framework
-
-Personalization will be based on:
-- Experience Level: beginner/intermediate/advanced
-- Hardware Access: RTX GPU, Jetson, real robot availability
-- Language Preference: English/Urdu
-
-Content sections will be tagged with requirements and shown/hidden based on user profile match.
+**Decision**: Client-side approach as it provides better user experience with immediate content adaptation.
 
 ## Urdu Translation Research
 
-### Translation Strategies
+### Translation Implementation Approaches
 
 1. **Pre-translated Static Content**:
-   - Pros: Fast switching, consistent quality, offline capability
-   - Cons: Maintenance overhead when English content changes
+   - Pros: Fast switching, consistent quality, predictable performance
+   - Cons: Maintenance overhead when content changes
    - Implementation: JSON files mapping English content to Urdu
 
-2. **On-demand LLM Translation**:
+2. **On-demand Translation**:
    - Pros: Automatic updates when English content changes
-   - Cons: Latency, cost, quality inconsistency
+   - Cons: Latency, potential quality issues, API costs
    - Implementation: API calls to translation service
 
-**Decision**: Pre-translated static content approach for better performance and translation quality.
+**Decision**: Pre-translated static content approach for better performance and quality control.
 
 ### Technical Accuracy Preservation
 
-For technical content like code blocks and commands:
-- Code remains in English (as it would be in real implementation)
-- Commands and technical terms preserved
+For technical content:
+- Code blocks and commands remain in English
+- Technical terms preserved in original form
 - Only explanatory text translated to Urdu
+- Structure (headings, lists) maintained in translation
 
-## Frontend Architecture Research
+## Architecture Pattern Research
 
-### Component Structure
+### Dual-Architecture Approach
 
-The implementation will use a component-based approach:
-- Auth components: Detect login state and provide access to profile
-- Personalization components: Adapt content based on profile
-- Translation components: Handle language switching
-- Integration components: Combine all features in chapter pages
+To address the SSG limitations while maintaining authentication:
 
-### State Management
+- Backend server (port 4000) handles authentication and user management
+- Frontend Docusaurus site handles content delivery
+- CORS configured to allow communication between frontend and backend
+- User context managed in React Context and synchronized with auth state
 
-- Auth state managed by Better Auth client SDK
-- Profile data cached locally after initial fetch
-- Personalization and translation states managed at component level
-- Global context for shared state across components
+### State Management Strategy
+
+- Global UserContext stores user object, personalization state, Urdu translation state
+- Auth state managed by better-auth client
+- Component-level state for UI toggles (personalization, translation)
+- Context provider wraps the application to make state available globally
 
 ## Security and Privacy Research
 
-### Data Collection Minimization
+### Data Storage and Access
 
-Following the principle of collecting only necessary data:
-- Authentication: Standard email/password or OAuth
-- Profile: Only background information needed for personalization
-- No tracking or analytics beyond authentication requirements
+- Extended user schema with specific fields as required: `software_exp`, `hardware_rtx`, `hardware_robot`, `preferred_lang`
+- SQLite database for user authentication data
+- Secure token handling through better-auth's built-in mechanisms
+- Environment variables for sensitive configuration
 
-### Token Management
+### Cross-Origin Resource Sharing
 
-- Better Auth handles secure token storage
-- Client-side only accesses necessary profile data
-- No sensitive information exposed in frontend code
-- Environment variables for API keys and secrets
+- Backend server configured to allow requests from Docusaurus frontend
+- Proper CORS headers to enable communication
+- Secure communication between frontend and backend
 
 ## Performance Considerations
 
-### Page Load Optimization
+### Backend Server Performance
 
-- Lazy loading of personalization and translation components
-- Caching of profile data and translation content
-- Minimal impact on initial page load for logged-out users
-- Optimized bundle size through code splitting
+- Lightweight server implementation to minimize resource usage
+- Efficient database queries for user data retrieval
+- Optimized authentication endpoints for fast response times
 
-### User Experience
+### Frontend Performance
 
-- Fast auth state detection (sub-1-second)
-- Immediate content adaptation when personalization is toggled
-- Seamless language switching without page reload
-- Consistent navigation and interaction patterns
+- Minimal impact on Docusaurus build process
+- Efficient context updates to avoid unnecessary re-renders
+- Proper component memoization for performance
+- Lazy loading for non-critical components
 
 ## Integration Validation
 
+### Backend-Frontend Communication
+
+- API endpoints properly secured and validated
+- Authentication state synchronization between backend and frontend
+- Error handling for network failures or backend unavailability
+- Session management and token refresh mechanisms
+
 ### Docusaurus Compatibility
 
-- Better Auth client SDK compatible with Docusaurus React environment
-- No conflicts with existing Docusaurus features
-- Maintains static site generation benefits
+- Better-auth client compatible with Docusaurus React environment
+- No conflicts with existing Docusaurus functionality
+- Maintains static site generation benefits for non-authenticated content
 - Preserves SEO and accessibility features
-
-### Testing Approach
-
-- Unit tests for individual components
-- Integration tests for auth flows
-- End-to-end tests for complete user journeys
-- Performance tests for page load times
 
 ## References and Resources
 
-### Better Auth Documentation
+### Better-Auth Documentation
 - Official documentation: https://www.better-auth.com/docs
-- React integration guide: https://www.better-auth.com/docs/react-client
-- Custom fields guide: https://www.better-auth.com/docs/custom-fields
+- Custom schema guide: https://www.better-auth.com/docs/custom-schema
+- Client integration: https://www.better-auth.com/docs/client
+
+### Hono Documentation
+- Official documentation: https://hono.dev/docs
+- Getting started: https://hono.dev/getting-started
+- TypeScript support: https://hono.dev/getting-started#typescript
 
 ### Docusaurus Documentation
 - MDX guide: https://docusaurus.io/docs/markdown-features/react
 - Custom components: https://docusaurus.io/docs/using-themes
 - Static site generation: https://docusaurus.io/docs/static-site-generation
-
-### Urdu Typography and Text Direction
-- Proper text rendering for Urdu language
-- RTL (right-to-left) text support
-- Font considerations for Urdu script

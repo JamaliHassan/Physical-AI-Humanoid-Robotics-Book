@@ -1,185 +1,265 @@
 import React, { useState } from 'react';
-import { useAuth } from './AuthProvider';
 
-const SignupForm = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    softwareExperience: 'beginner',
-    roboticsExperience: 'none',
-    hasRTX: false,
-    hasJetson: false,
-    hasRealRobot: false,
-    preferredLanguages: ['English'],
-  });
+interface SignupFormProps {}
 
-  const { signUp, isLoading } = useAuth();
+const SignupForm: React.FC<SignupFormProps> = () => {
+  // Step 1: Email and password
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Step 2: Background questionnaire
+  const [softwareExp, setSoftwareExp] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
+  const [hardwareRTX, setHardwareRTX] = useState(false);
+  const [hardwareRobot, setHardwareRobot] = useState(false);
+  const [preferredLang, setPreferredLang] = useState<'en' | 'ur'>('en');
+
+  const [currentStep, setCurrentStep] = useState(1);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleStep1Submit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      // Create user profile data
-      const profileData = {
-        email: formData.email,
-        password: formData.password,
-        // Store extended profile data in user attributes
-        $: {
-          softwareExperience: formData.softwareExperience,
-          roboticsExperience: formData.roboticsExperience,
-          hasRTX: formData.hasRTX,
-          hasJetson: formData.hasJetson,
-          hasRealRobot: formData.hasRealRobot,
-          preferredLanguages: JSON.stringify(formData.preferredLanguages),
-        }
-      };
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
-      await signUp('email', profileData);
-    } catch (error) {
-      console.error('Signup error:', error);
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    setError('');
+    setCurrentStep(2);
+  };
+
+  const handleStep2Submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      // Call the sign-up API endpoint directly
+      const response = await fetch('http://localhost:4000/api/auth/sign-up/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          // Include the extended profile data in the signup request
+          profile: {
+            software_exp: softwareExp,
+            hardware_rtx: hardwareRTX,
+            hardware_robot: hardwareRobot,
+            preferred_lang: preferredLang
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || 'Sign up failed. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Successful sign-up - redirect or update context
+      const result = await response.json();
+
+      // Optionally reload the page or update context to reflect the new session
+      window.location.reload();
+    } catch (err) {
+      console.error('Sign up error:', err);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="signup-form">
-      <div className="form-group">
-        <label htmlFor="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({...formData, email: e.target.value})}
-          required
-          className="form-input"
-        />
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={(e) => setFormData({...formData, password: e.target.value})}
-          required
-          className="form-input"
-        />
-      </div>
-
-      {/* Background questions */}
-      <div className="form-group">
-        <label htmlFor="softwareExperience">Software Experience</label>
-        <select
-          id="softwareExperience"
-          value={formData.softwareExperience}
-          onChange={(e) => setFormData({...formData, softwareExperience: e.target.value})}
-          className="form-select"
-        >
-          <option value="beginner">Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
-        </select>
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="roboticsExperience">Robotics/ROS Experience</label>
-        <select
-          id="roboticsExperience"
-          value={formData.roboticsExperience}
-          onChange={(e) => setFormData({...formData, roboticsExperience: e.target.value})}
-          className="form-select"
-        >
-          <option value="none">None</option>
-          <option value="some">Some</option>
-          <option value="advanced">Advanced</option>
-        </select>
-      </div>
-
-      <div className="form-group checkbox-group">
-        <label>
-          <input
-            type="checkbox"
-            checked={formData.hasRTX}
-            onChange={(e) => setFormData({...formData, hasRTX: e.target.checked})}
-          />
-          Access to RTX-class GPU?
-        </label>
-      </div>
-
-      <div className="form-group checkbox-group">
-        <label>
-          <input
-            type="checkbox"
-            checked={formData.hasJetson}
-            onChange={(e) => setFormData({...formData, hasJetson: e.target.checked})}
-          />
-          Access to Jetson (Orin Nano/NX)?
-        </label>
-      </div>
-
-      <div className="form-group checkbox-group">
-        <label>
-          <input
-            type="checkbox"
-            checked={formData.hasRealRobot}
-            onChange={(e) => setFormData({...formData, hasRealRobot: e.target.checked})}
-          />
-          Access to real robot?
-        </label>
-      </div>
-
-      <div className="form-group">
-        <label>Preferred Languages</label>
-        <div className="language-options">
-          <label>
-            <input
-              type="checkbox"
-              checked={formData.preferredLanguages.includes('English')}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setFormData({
-                    ...formData,
-                    preferredLanguages: [...formData.preferredLanguages, 'English']
-                  });
-                } else {
-                  setFormData({
-                    ...formData,
-                    preferredLanguages: formData.preferredLanguages.filter(lang => lang !== 'English')
-                  });
-                }
-              }}
-            />
-            English
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={formData.preferredLanguages.includes('Urdu')}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setFormData({
-                    ...formData,
-                    preferredLanguages: [...formData.preferredLanguages, 'Urdu']
-                  });
-                } else {
-                  setFormData({
-                    ...formData,
-                    preferredLanguages: formData.preferredLanguages.filter(lang => lang !== 'Urdu')
-                  });
-                }
-              }}
-            />
-            Urdu
-          </label>
+    <div className="space-y-4">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{error}</span>
         </div>
-      </div>
+      )}
 
-      <button type="submit" disabled={isLoading} className="submit-button">
-        {isLoading ? 'Signing up...' : 'Sign Up'}
-      </button>
-    </form>
+      {currentStep === 1 ? (
+        <form onSubmit={handleStep1Submit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="your@email.com"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Continue
+            </button>
+          </div>
+        </form>
+      ) : (
+        <form onSubmit={handleStep2Submit} className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900">Background Questionnaire</h3>
+              <p className="text-sm text-gray-500">Help us personalize your learning experience</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Software Experience Level
+              </label>
+              <div className="space-y-2">
+                {(['beginner', 'intermediate', 'advanced'] as const).map((level) => (
+                  <label key={level} className="flex items-center">
+                    <input
+                      type="radio"
+                      name="softwareExp"
+                      checked={softwareExp === level}
+                      onChange={() => setSoftwareExp(level)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 capitalize">
+                      {level}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Hardware Access
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={hardwareRTX}
+                    onChange={(e) => setHardwareRTX(e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">
+                    I have access to RTX-capable GPU hardware
+                  </span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={hardwareRobot}
+                    onChange={(e) => setHardwareRobot(e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">
+                    I have access to physical robot hardware
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Preferred Language
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="preferredLang"
+                    checked={preferredLang === 'en'}
+                    onChange={() => setPreferredLang('en')}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">
+                    English
+                  </span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="preferredLang"
+                    checked={preferredLang === 'ur'}
+                    onChange={() => setPreferredLang('ur')}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">
+                    اردو (Urdu)
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex space-x-3">
+            <button
+              type="button"
+              onClick={() => setCurrentStep(1)}
+              className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                isLoading
+                  ? 'bg-blue-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+              }`}
+            >
+              {isLoading ? 'Creating Account...' : 'Create Account'}
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 };
 

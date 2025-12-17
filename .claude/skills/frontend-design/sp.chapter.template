@@ -1,0 +1,45 @@
+# Chapter Template: Physical AI & Humanoid Robotics Book
+
+## Chapter: [TITLE]
+**Module**: [Module Number and Name]
+**Week**: [Course Week Number]
+**Complexity**: [Short Overview / Medium / Deep Technical]
+**Target Hardware**: [Simulation (RTX PC) / Edge (Jetson) / Both]
+
+## Learning Objectives
+- [List of specific learning outcomes]
+
+## Prerequisites
+- [Required knowledge/skills]
+
+## Content Structure
+### 1. Concept (Theory)
+- [Theoretical concepts and principles]
+
+### 2. Simulator Implementation
+- [Step-by-step implementation in simulation]
+- **Hardware Reality Check**: Runs on Simulation (RTX PC)
+- **Code Example**:
+```python
+# Example code block
+```
+- **Dependencies**: [package.xml or dependency list]
+
+### 3. Edge Deployment Strategy
+- [How to adapt for physical robot deployment]
+- **Hardware Reality Check**: Runs on Edge (Jetson)
+- **Code Modifications**: [Differences from simulation]
+
+## Visual Verification
+```mermaid
+[Mermaid.js diagram specification]
+```
+
+## Exercises and Labs
+- [Practical exercises for students]
+
+## Troubleshooting
+- [Common issues and solutions]
+
+## Further Reading
+- [References to related chapters/concepts]

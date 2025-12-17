@@ -1,0 +1,356 @@
+---
+id: m4c1-voice-to-action
+title: "Chapter 1: Voice-to-Action for AI Integration"
+sidebar_label: Voice-to-Action
+description: "Implement voice command processing with OpenAI integration"
+keywords:
+  - voice-recognition
+  - nlp
+  - ai-integration
+  - humanoid-interaction
+module: 4
+week: 10
+complexity: deep-technical
+target_hardware: ["simulation", "edge"]
+learning_objectives:
+  - "Implement voice command processing with OpenAI Whisper"
+  - "Parse natural language to ROS 2 service calls"
+  - "Create a dialogue system for humanoid interaction"
+  - "Integrate speech recognition with action planning"
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Chapter 1: Voice-to-Action for AI Integration
+
+## Learning Objectives
+- Implement voice command processing with OpenAI Whisper
+- Parse natural language to ROS 2 service calls
+- Create a dialogue system for humanoid interaction
+- Integrate speech recognition with action planning
+- Handle voice command ambiguity and error recovery
+
+## Prerequisites
+- Nav2 navigation from M3C3
+- Isaac ROS perception from M3C2
+- Basic understanding of natural language processing
+
+## 1. Concept (Theory)
+Voice-to-Action systems enable natural human-robot interaction by converting spoken commands into robot actions. The pipeline includes:
+- Speech recognition to convert audio to text
+- Natural language understanding to extract intent
+- Action mapping to convert intent to robot commands
+- Execution monitoring and feedback
+
+For humanoid robots, voice commands can include navigation, manipulation, and social interaction tasks.
+
+## 2. Simulator Implementation
+
+<Tabs>
+<TabItem value="simulation" label="Simulation Setup">
+
+```python
+# voice_to_action_node.py
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+from geometry_msgs.msg import PoseStamped
+from builtin_interfaces.msg import Duration
+from rclpy.action import ActionClient
+from nav2_msgs.action import NavigateToPose
+import speech_recognition as sr
+import openai
+import threading
+import queue
+import time
+
+class VoiceToActionNode(Node):
+    def __init__(self):
+        super().__init__('voice_to_action_node')
+
+        # Initialize speech recognition
+        self.recognizer = sr.Recognizer()
+        self.microphone = sr.Microphone()
+
+        # Initialize OpenAI client
+        # Set your API key in environment: OPENAI_API_KEY
+        self.openai_client = openai.OpenAI()
+
+        # Navigation action client
+        self.nav_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+
+        # Publishers and subscribers
+        self.voice_cmd_pub = self.create_publisher(String, 'voice_commands', 10)
+        self.status_pub = self.create_publisher(String, 'voice_status', 10)
+
+        # Command queue for processing
+        self.command_queue = queue.Queue()
+
+        # Start voice recognition thread
+        self.voice_thread = threading.Thread(target=self.voice_recognition_loop)
+        self.voice_thread.daemon = True
+        self.voice_thread.start()
+
+        # Timer for processing commands
+        self.process_timer = self.create_timer(0.1, self.process_commands)
+
+        self.get_logger().info('Voice-to-Action node started')
+
+    def voice_recognition_loop(self):
+        """Continuously listen for voice commands"""
+        with self.microphone as source:
+            self.recognizer.adjust_for_ambient_noise(source)
+
+        while rclpy.ok():
+            try:
+                with self.microphone as source:
+                    audio = self.recognizer.listen(source, timeout=1, phrase_time_limit=5)
+
+                # Recognize speech using Google's service
+                text = self.recognizer.recognize_google(audio)
+                self.get_logger().info(f'Recognized: {text}')
+
+                # Add to processing queue
+                self.command_queue.put(text)
+
+            except sr.WaitTimeoutError:
+                # No speech detected, continue listening
+                pass
+            except sr.UnknownValueError:
+                self.get_logger().warn('Could not understand audio')
+            except sr.RequestError as e:
+                self.get_logger().error(f'Speech recognition error: {e}')
+            except Exception as e:
+                self.get_logger().error(f'Voice recognition error: {e}')
+
+            time.sleep(0.1)
+
+    def process_commands(self):
+        """Process voice commands from queue"""
+        try:
+            while not self.command_queue.empty():
+                command_text = self.command_queue.get_nowait()
+
+                # Publish raw command
+                cmd_msg = String()
+                cmd_msg.data = command_text
+                self.voice_cmd_pub.publish(cmd_msg)
+
+                # Parse and execute command
+                self.parse_and_execute_command(command_text)
+
+        except queue.Empty:
+            pass
+
+    def parse_and_execute_command(self, command_text):
+        """Parse natural language command and execute corresponding action"""
+        try:
+            # Use OpenAI to parse the command
+            response = self.openai_client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are a command parser for a humanoid robot.
+                        Convert natural language commands to structured robot actions.
+                        Available actions: navigate_to, pick_up, place, speak, wave, sit, stand.
+                        Respond with JSON format: {"action": "action_name", "parameters": {...}}"""
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Command: {command_text}"
+                    }
+                ],
+                temperature=0.1
+            )
+
+            # Parse the response
+            import json
+            result = json.loads(response.choices[0].message.content)
+            action = result.get('action')
+            params = result.get('parameters', {})
+
+            self.get_logger().info(f'Parsed action: {action} with params: {params}')
+
+            # Execute the action
+            if action == 'navigate_to':
+                self.execute_navigation(params)
+            elif action == 'speak':
+                self.execute_speak(params)
+            # Add more actions as needed
+
+        except Exception as e:
+            self.get_logger().error(f'Command parsing error: {e}')
+
+    def execute_navigation(self, params):
+        """Execute navigation action"""
+        # Wait for navigation action server
+        if not self.nav_client.wait_for_server(timeout_sec=1.0):
+            self.get_logger().error('Navigation action server not available')
+            return
+
+        # Create goal
+        goal_msg = NavigateToPose.Goal()
+        goal_msg.pose.header.frame_id = 'map'
+        goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
+
+        # Set pose from parameters (simplified)
+        goal_msg.pose.pose.position.x = params.get('x', 0.0)
+        goal_msg.pose.pose.position.y = params.get('y', 0.0)
+        goal_msg.pose.pose.orientation.z = params.get('theta', 0.0)
+        goal_msg.pose.pose.orientation.w = 1.0
+
+        # Send goal
+        future = self.nav_client.send_goal_async(goal_msg)
+        future.add_done_callback(self.navigation_done_callback)
+
+    def execute_speak(self, params):
+        """Execute speech action"""
+        text = params.get('text', 'Hello')
+        self.get_logger().info(f'Speaking: {text}')
+        # In simulation, just log the action
+        # In real robot, would use text-to-speech
+
+    def navigation_done_callback(self, future):
+        """Handle navigation completion"""
+        result = future.result()
+        if result:
+            self.get_logger().info('Navigation completed successfully')
+        else:
+            self.get_logger().error('Navigation failed')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = VoiceToActionNode()
+
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+Configuration file for voice-to-action:
+```yaml
+# voice_to_action_config.yaml
+voice_to_action:
+  ros__parameters:
+    speech_recognition:
+      engine: "google"  # or "whisper"
+      language: "en-US"
+      sensitivity: 0.5
+    openai:
+      model: "gpt-3.5-turbo"
+      temperature: 0.1
+    commands:
+      max_processing_time: 10.0
+      retry_attempts: 3
+    audio:
+      sample_rate: 16000
+      chunk_size: 1024
+```
+
+**Hardware Reality Check**: Runs on Simulation (RTX PC)
+
+**Dependencies**:
+```xml
+<!-- package.xml -->
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>voice_to_action</name>
+  <version>0.1.0</version>
+  <description>Voice-to-Action system for humanoid robots</description>
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>Apache-2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav2_msgs</depend>
+  <depend>builtin_interfaces</depend>
+
+  <exec_depend>speechrecognition</exec_depend>
+  <exec_depend>openai</exec_depend>
+  <exec_depend>pyaudio</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+```
+
+</TabItem>
+</Tabs>
+
+## 3. Edge Deployment Strategy
+
+<Tabs>
+<TabItem value="edge" label="Edge Deployment">
+
+Deploy voice-to-action system on NVIDIA Jetson:
+
+```bash
+# For edge deployment, consider using local speech recognition
+# Install faster-whisper for offline speech recognition
+pip install faster-whisper
+
+# Launch with edge-optimized parameters
+ros2 launch voice_to_action voice_to_action_jetson.launch.py
+
+# Optimize for Jetson constraints
+# - Use smaller language models
+# - Reduce audio processing frequency
+# - Implement power management
+```
+
+Optimize for edge constraints:
+- Use offline speech recognition (faster-whisper)
+- Implement wake word detection to reduce processing
+- Use lightweight language models when possible
+- Add audio preprocessing for noise reduction
+
+**Hardware Reality Check**: Runs on Edge (Jetson)
+
+</TabItem>
+</Tabs>
+
+## Visual Verification
+```mermaid
+graph TD
+    A[Audio Input] --> B[Speech Recognition]
+    B --> C[Natural Language Understanding]
+    C --> D[Intent Extraction]
+    D --> E[Action Mapping]
+    E --> F[Robot Execution]
+    F --> G[Feedback]
+    G --> A
+    H[OpenAI API] --> C
+    I[Navigation] --> F
+    J[Manipulation] --> F
+```
+
+## Exercises and Labs
+1. Implement voice command recognition in simulation
+2. Parse natural language commands to robot actions
+3. Test voice-to-action pipeline with various commands
+4. Implement error handling and recovery
+5. Deploy on Jetson hardware with offline processing
+
+## Troubleshooting
+- If speech recognition fails, check microphone permissions and audio settings
+- For parsing errors, verify OpenAI API key and connectivity
+- If actions don't execute, check action server availability
+- For performance issues, optimize processing frequency and model size
+
+## Further Reading
+- OpenAI API documentation
+- Speech recognition in robotics
+- Natural language processing for robotics
+- Voice user interface design

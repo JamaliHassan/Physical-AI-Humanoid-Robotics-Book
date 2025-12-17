@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../Auth/AuthProvider';
+import { useUserContext } from '../../context/UserContext';
 
 interface UrduContentProps {
   chapterId: string;
@@ -12,27 +12,17 @@ const UrduContent: React.FC<UrduContentProps> = ({
   englishContent,
   urduContent
 }) => {
-  const { isAuthenticated, userProfile, isLoading } = useAuth();
+  const { user, isUrduView, toggleUrduView } = useUserContext();
   const [currentContent, setCurrentContent] = useState<React.ReactNode>(englishContent);
-  const [isUrdu, setIsUrdu] = useState(false);
+
+  // Check if user is authenticated (user object exists)
+  const isAuthenticated = !!user;
+  const isLoading = false; // No loading state needed with better-auth context
 
   useEffect(() => {
-    // Check user's preferred language from profile
-    if (userProfile && userProfile.preferredLanguages) {
-      if (userProfile.preferredLanguages.includes('Urdu')) {
-        setIsUrdu(true);
-      }
-    }
-  }, [userProfile]);
-
-  useEffect(() => {
-    // Update content based on language selection
-    setCurrentContent(isUrdu ? urduContent : englishContent);
-  }, [isUrdu, englishContent, urduContent]);
-
-  const toggleLanguage = () => {
-    setIsUrdu(!isUrdu);
-  };
+    // Update content based on language selection from context
+    setCurrentContent(isUrduView ? urduContent : englishContent);
+  }, [isUrduView, englishContent, urduContent]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -54,14 +44,14 @@ const UrduContent: React.FC<UrduContentProps> = ({
   return (
     <div className="urdu-content">
       <button
-        onClick={toggleLanguage}
-        className={`language-toggle ${isUrdu ? 'urdu' : 'english'}`}
-        aria-label={isUrdu ? 'Switch to English' : 'Switch to Urdu'}
+        onClick={toggleUrduView}
+        className={`language-toggle ${isUrduView ? 'urdu' : 'english'}`}
+        aria-label={isUrduView ? 'Switch to English' : 'Switch to Urdu'}
       >
-        {isUrdu ? 'انگریزی میں تبدیل کریں' : 'اردو میں تبدیل کریں'}
+        {isUrduView ? 'انگریزی میں تبدیل کریں' : 'اردو میں تبدیل کریں'}
       </button>
 
-      <div className={`content-container ${isUrdu ? 'urdu' : 'english'}`}>
+      <div className={`content-container ${isUrduView ? 'urdu' : 'english'}`}>
         {currentContent}
       </div>
     </div>

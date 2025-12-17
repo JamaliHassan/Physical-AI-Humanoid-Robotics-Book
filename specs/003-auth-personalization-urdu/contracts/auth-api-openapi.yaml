@@ -1,0 +1,239 @@
+openapi: 3.0.0
+info:
+  title: Auth API for Physical AI & Humanoid Robotics Book
+  description: API for user authentication, profile management, and session handling
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+    description: Development server
+  - url: https://api.book.example.com
+    description: Production server
+
+paths:
+  /api/auth/signin:
+    post:
+      summary: User sign in
+      description: Authenticate user with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                password:
+                  type: string
+                  format: password
+                  description: User's password
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Authentication token
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+        '400':
+          description: Invalid request parameters
+
+  /api/auth/signup:
+    post:
+      summary: User sign up
+      description: Create new user account with profile information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                password:
+                  type: string
+                  format: password
+                  description: User's password
+                name:
+                  type: string
+                  description: User's display name
+                software_exp:
+                  type: string
+                  enum: [beginner, intermediate, advanced]
+                  description: User's software experience level
+                hardware_rtx:
+                  type: boolean
+                  description: Whether user has access to RTX-class GPU
+                hardware_robot:
+                  type: boolean
+                  description: Whether user has access to real robot
+                preferred_lang:
+                  type: string
+                  description: User's preferred language (e.g., "en", "ur")
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Authentication token
+                  user:
+                    $ref: '#/components/schemas/User'
+        '409':
+          description: User with this email already exists
+        '400':
+          description: Invalid request parameters
+
+  /api/auth/profile:
+    get:
+      summary: Get user profile
+      description: Retrieve current user's profile information
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized, invalid or expired token
+    put:
+      summary: Update user profile
+      description: Update current user's profile information
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                software_exp:
+                  type: string
+                  enum: [beginner, intermediate, advanced]
+                hardware_rtx:
+                  type: boolean
+                hardware_robot:
+                  type: boolean
+                preferred_lang:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized, invalid or expired token
+        '400':
+          description: Invalid request parameters
+
+  /api/auth/session:
+    get:
+      summary: Get session info
+      description: Retrieve current session information
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Session information retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                    description: Whether the session is still valid
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized, invalid or expired token
+
+  /api/auth/signout:
+    post:
+      summary: User sign out
+      description: Invalidate current session
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successfully signed out
+        '401':
+          description: Unauthorized, invalid or expired token
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User's email address
+        name:
+          type: string
+          description: User's display name
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last profile update timestamp
+        software_exp:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: User's software experience level
+        hardware_rtx:
+          type: boolean
+          description: Whether user has access to RTX-class GPU
+        hardware_robot:
+          type: boolean
+          description: Whether user has access to real robot
+        preferred_lang:
+          type: string
+          description: User's preferred language (e.g., "en", "ur")
+      required:
+        - id
+        - email
+        - name
+        - createdAt
+        - updatedAt

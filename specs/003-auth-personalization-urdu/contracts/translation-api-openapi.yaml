@@ -1,0 +1,138 @@
+openapi: 3.0.0
+info:
+  title: Translation API for Physical AI & Humanoid Robotics Book
+  description: API for managing and retrieving Urdu translations of book content
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+    description: Development server
+  - url: https://api.book.example.com
+    description: Production server
+
+paths:
+  /api/translations/{contentId}:
+    get:
+      summary: Get translation for content
+      description: Retrieve the Urdu translation for a specific content item
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the content to translate
+        - name: language
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ur
+          description: Target language code (default is Urdu)
+      responses:
+        '200':
+          description: Translation retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslationContent'
+        '404':
+          description: Translation not found for the requested content
+        '400':
+          description: Invalid request parameters
+
+  /api/translations/chapter/{chapterId}:
+    get:
+      summary: Get chapter translation
+      description: Retrieve the Urdu translation for an entire chapter
+      parameters:
+        - name: chapterId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the chapter
+      responses:
+        '200':
+          description: Chapter translation retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterTranslation'
+        '404':
+          description: Translation not found for the requested chapter
+
+components:
+  schemas:
+    TranslationContent:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Content identifier
+        sourceLanguage:
+          type: string
+          description: Source language code (e.g., "en")
+        targetLanguage:
+          type: string
+          description: Target language code (e.g., "ur")
+        sourceContent:
+          type: string
+          description: Original English content
+        translatedContent:
+          type: string
+          description: Translated Urdu content
+        lastUpdated:
+          type: string
+          format: date-time
+          description: Last translation update timestamp
+        preservedElements:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Element type (e.g., "code", "command")
+              original:
+                type: string
+                description: Original content to preserve
+              placeholder:
+                type: string
+                description: Placeholder in translated text
+          description: Elements that should be preserved in translation (code blocks, commands)
+      required:
+        - id
+        - sourceLanguage
+        - targetLanguage
+        - sourceContent
+        - translatedContent
+
+    ChapterTranslation:
+      type: object
+      properties:
+        chapterId:
+          type: string
+          description: Chapter identifier
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/TranslationContent'
+          description: Translated sections of the chapter
+        metadata:
+          type: object
+          properties:
+            translatedAt:
+              type: string
+              format: date-time
+              description: When the chapter was translated
+            wordCount:
+              type: integer
+              description: Number of words in translation
+            qualityScore:
+              type: number
+              format: float
+              description: Translation quality score (0-1)
+          description: Translation metadata
+      required:
+        - chapterId
+        - sections
